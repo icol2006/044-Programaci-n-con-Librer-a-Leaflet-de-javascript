@@ -4,17 +4,16 @@ if(isset($_POST['save']))
 {	 
 	 $latitud = $_POST['lat'];
 	 $longitud = $_POST['lon'];
-	 $sql = "INSERT INTO tb_puntos_gps (latitud,longitud)
-	 VALUES ('$latitud','$longitud')";
+	 $sql ="UPDATE inmuebles set latitud='" . $_POST['lat'] . "', longitud='" . $_POST['lon'] . "'";
 	 if (mysqli_query($conn, $sql)) {
-		echo "New record created successfully !";
+		echo "Registro actualizado!";
 	 } else {
 		echo "Error: " . $sql . "
 " . mysqli_error($conn);
 	 }
 	 mysqli_close($conn);
 
-	 header("Location: index.html");
+	 //header("Location: index.php");
 die();
 }
 ?>
