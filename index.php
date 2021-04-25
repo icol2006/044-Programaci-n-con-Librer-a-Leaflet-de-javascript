@@ -58,10 +58,10 @@
           <b style="margin-right: 20px;">Buscar direccion</b>
         </td>
         <td>
-          <input style="height:30px;margin-right: 20px;" type="text" name="addr" value="<?php echo (isset($_GET['direccion'])) ? $_GET['direccion'] : "0" ?>" id="addr" size="58" />
+          <input style="height:30px;margin-right: 20px;" type="text" name="addr" value="<?php echo (isset($_GET['direccion'])) ? $_GET['direccion'] : "" ?>" id="addr" size="58" onchange="refrescarValorDireccion()" />
         </td>
         <td>
-          <button type="button" style="float: right;" onclick="addr_search();">Buscar</button>
+          <button type="button" style="float: right;" onclick="addr_search(true);">Buscar</button>
         </td>
       </tr>
     </table>
@@ -72,6 +72,7 @@
     <br>
     <form method="post" action="save.php">
       <input type="hidden" name="id" value="<?php echo (isset($_GET['id'])) ? $_GET['id'] : "0" ?>">
+      <input type="hidden" id="direccion" name="direccion" value="<?php echo (isset($_GET['direccion'])) ? $_GET['direccion'] : "" ?>"></input>
       <table>
         <tr>
           <td>
@@ -92,9 +93,11 @@
   </div>
 
   <script type="text/javascript">
-    // New York
-    var startlat = 40.75637123;
-    var startlon = -73.98545321;
+    // Barcelona
+    var startlat = '<?php echo (isset($_GET['lat'])) ? $_GET['lat'] : 41.38289390 ?>';
+    var startlon = '<?php echo (isset($_GET['lon'])) ? $_GET['lon'] : 2.17743220 ?>';
+
+
 
     var options = {
       center: [startlat, startlon],
@@ -132,16 +135,27 @@
 
     function chooseAddr(lat1, lng1) {
       myMarker.closePopup();
+      lat = "0";
+      lon = "0";
       map.setView([lat1, lng1], 18);
       myMarker.setLatLng([lat1, lng1]);
-      lat = lat1.toFixed(8);
-      lon = lng1.toFixed(8);
+      if (typeof lat1 == "number") {
+        lat = lat1.toFixed(8);
+      } else {
+        lat = lat1;
+      }
+      if (typeof lng1 == "number") {
+        lon = lng1.toFixed(8);
+      } else {
+        lon = lng1;
+      }
+
       document.getElementById('lat').value = lat;
       document.getElementById('lon').value = lon;
       myMarker.bindPopup("Lat " + lat + "<br />Lon " + lon).openPopup();
     }
 
-    function myFunction(arr) {
+    function myFunction(arr,configurarPunto) {
       var out = "";
       var i;
 
@@ -153,7 +167,9 @@
 
         document.getElementById('results').innerHTML = out;
 
-        if (arr.length > 0) {
+        var puntoGpsInicial = '<?php echo (isset($_GET['lat'])) ? $_GET['lat']  : "" ?>'
+
+        if (arr.length > 0 && configurarPunto==true) {
           chooseAddr(parseFloat(arr[0].lat), parseFloat(arr[0].lon));
         }
       } else {
@@ -162,21 +178,34 @@
 
     }
 
-    function addr_search() {
+    function addr_search(configurarPunto) {
       var inp = document.getElementById("addr");
       var xmlhttp = new XMLHttpRequest();
       var url = "https://nominatim.openstreetmap.org/search?format=json&limit=15&q=" + inp.value;
       xmlhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           var myArr = JSON.parse(this.responseText);
-          myFunction(myArr);
+          myFunction(myArr,configurarPunto);
         }
       };
       xmlhttp.open("GET", url, true);
       xmlhttp.send();
     }
 
-    addr_search();
+    addr_search(false);
+
+
+    chooseAddr(startlat, startlon);
+
+    function refrescarValorDireccion() {
+      document.getElementById("direccion").value = document.getElementById("addr").value;
+    }
+
+    var res = '<?php echo (isset($_GET['res'])) ? $_GET['res']  : "" ?>'
+
+    if (res.length > 0) {
+      res == "done" ? alert("Registro Guardado") : alert("Registro no fue guardado");
+    }
   </script>
 
 </body>
